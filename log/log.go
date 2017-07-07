@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -12,6 +13,21 @@ const (
 	WARNING
 	FATAL
 )
+
+var (
+	_mode_map = map[string]int8{
+		`info`:    INFO,
+		`debug`:   DEBUG,
+		`warning`: WARNING,
+		`fatal`:   FATAL,
+	}
+)
+
+func (this *Logger) StrToMode(mode string) int8 {
+	m := strings.ToLower(mode)
+	i := _mode_map[m]
+	return i
+}
 
 func NewLogger(filePath string, mode int8) (l *Logger) {
 	var dir = filepath.Dir(filePath)
