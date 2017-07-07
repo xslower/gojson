@@ -3,6 +3,7 @@ package json
 import (
 	// `strings`
 	"errors"
+	"strconv"
 )
 
 var (
@@ -18,6 +19,14 @@ var (
 func Encode(input interface{}) string {
 	var buf = make([]byte, 0, 512)
 	switch slc := input.(type) {
+	case int:
+		return strconv.FormatInt(int64(slc), 10)
+	case int64:
+		return strconv.FormatInt(slc, 10)
+	case string:
+		buf = append(buf, '"')
+		buf = append(buf, slc...)
+		buf = append(buf, '"')
 	case map[string]int:
 		buf = encode_map_int(slc)
 	case map[string]int64:
