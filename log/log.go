@@ -23,7 +23,7 @@ var (
 	}
 )
 
-func (this *Logger) StrToMode(mode string) int8 {
+func StrToMode(mode string) int8 {
 	m := strings.ToLower(mode)
 	i := _mode_map[m]
 	return i

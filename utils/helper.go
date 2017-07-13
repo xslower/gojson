@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -14,7 +15,7 @@ func init() {
 	// date := Date(`Y-m-d`, time.Now())
 }
 
-func Throw(err error, msg ...string) {
+func Throw(err error, msg ...interface{}) {
 	if err == nil {
 		return
 	}
@@ -77,4 +78,104 @@ func CopyFile(src, dst string) (w int64, err error) {
 func PathExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+}
+
+const (
+	TYPE_NOT_SUPPORT uint8 = iota
+	TYPE_STRING
+	TYPE_INT
+	TYPE_UINT
+	TYPE_FLOAT
+	TYPE_BOOL
+	TYPE_NULL
+)
+
+//not support int8/uint8 please use int16/uint16
+func InterfaceToString(ifc interface{}) (value string, stype uint8) {
+	if ifc == nil {
+		return ``, TYPE_NULL
+	}
+	switch val := ifc.(type) {
+	case int16:
+		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
+	case int32:
+		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
+	case int64:
+		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
+	case int:
+		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
+	case uint16:
+		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
+	case uint32:
+		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
+	case uint64:
+		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
+	case uint:
+		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
+	case float32:
+		value, stype = strconv.FormatFloat(float64(val), 'g', -1, 32), TYPE_FLOAT
+	case float64:
+		value, stype = strconv.FormatFloat(val, 'g', -1, 64), TYPE_FLOAT
+	case bool:
+		ret := `0`
+		if val {
+			ret = `1`
+		}
+		value, stype = ret, TYPE_BOOL
+	case string:
+		value, stype = val, TYPE_STRING
+	case []byte:
+		value, stype = string(val), TYPE_STRING
+	case time.Time:
+		value, stype = ``, TYPE_STRING
+	default:
+		value, stype = ``, TYPE_NOT_SUPPORT
+	}
+	return
+}
+
+//not support int8/uint8 please use int16/uint16
+func InterfaceToInt(ifc interface{}) (value int, stype uint8) {
+	if ifc == nil {
+		return 0, TYPE_NULL
+	}
+	switch val := ifc.(type) {
+	case int16:
+		value, stype = int(val), TYPE_INT
+	case int32:
+		value, stype = int(val), TYPE_INT
+	case int64:
+		value, stype = int(val), TYPE_INT
+	case int:
+		value, stype = val, TYPE_INT
+	case uint16:
+		value, stype = int(val), TYPE_UINT
+	case uint32:
+		value, stype = int(val), TYPE_UINT
+	case uint64:
+		value, stype = int(val), TYPE_UINT
+	case uint:
+		value, stype = int(val), TYPE_UINT
+	case float32:
+		value, stype = int(val), TYPE_FLOAT
+	case float64:
+		value, stype = int(val), TYPE_FLOAT
+	case bool:
+		ret := 0
+		if val {
+			ret = 1
+		}
+		value, stype = ret, TYPE_BOOL
+	case string:
+		ret, _ := strconv.Atoi(val)
+		value, stype = ret, TYPE_STRING
+	case []byte:
+		ret, _ := strconv.Atoi(string(val))
+		value, stype = ret, TYPE_STRING
+	case time.Time:
+		value, stype = 0, TYPE_STRING
+	default:
+		value, stype = 0, TYPE_NOT_SUPPORT
+	}
+	return
 }
