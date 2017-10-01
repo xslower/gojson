@@ -4,14 +4,6 @@ import (
 	"fmt"
 )
 
-func Echo(i ...interface{}) {
-	fmt.Println(i...)
-}
-
-func EchoPtrSlice() {
-
-}
-
 func EchoStrSlice(strs ...[]string) {
 	for i, val := range strs {
 		fmt.Print(`[`, i, `] `)
@@ -25,9 +17,9 @@ func EchoStrSlice(strs ...[]string) {
 func EchoBytes(args interface{}) {
 	switch v := args.(type) {
 	case []byte:
-		Echo(string(v))
+		fmt.Println(string(v))
 	case []rune:
-		Echo(string(v))
+		fmt.Println(string(v))
 	case [][]byte:
 		for i, val := range v {
 			fmt.Print(i, `: `, string(val), ` `)
@@ -49,7 +41,7 @@ func EchoBytes(args interface{}) {
 			EchoBytes(val)
 		}
 	default:
-		Echo(v)
+		fmt.Println(v)
 	}
 
 }

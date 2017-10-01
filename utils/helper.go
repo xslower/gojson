@@ -1,37 +1,12 @@
 package utils
 
 import (
-	"fmt"
 	"io"
 	"os"
-	"strconv"
 	"strings"
 	"time"
+	"math/rand"
 )
-
-var ()
-
-func init() {
-	// date := Date(`Y-m-d`, time.Now())
-}
-
-func Throw(err error, msg ...interface{}) {
-	if err == nil {
-		return
-	}
-	// for i, data := range msg {
-	// 	m := ``
-	// 	if len(data) > 100 {
-	// 		m = string(data[len(data)-100:])
-	// 	} else {
-	// 		m = string(data)
-	// 	}
-	// 	msg[i] = m
-	// }
-
-	panic(err.Error() + fmt.Sprint(msg...))
-
-}
 
 //以标准的日期格式输入，获得时间字符串
 func Date(format string, t time.Time) string {
@@ -44,19 +19,17 @@ func Date(format string, t time.Time) string {
 	return t.Format(format)
 }
 
-/**
- * BKDR Hash Function
- * 把字符串hash到64位整数
- */
-func BKDRHash(str string) uint64 {
-	var seed uint64 = 131 // 31 131 1313 13131 131313 etc..
-	var hash uint64 = 0
-
-	for i := 0; i < len(str); i++ {
-		var ui = uint64(str[i])
-		hash = hash*seed + ui
-	}
-	return hash
+func StdDate(t time.Time) (date string) {
+	date = t.Format(`2006-01-02`)
+	return
+}
+func StdDateTime(t time.Time) (datetime string) {
+	datetime = t.Format(`2006-01-02 15:04:05`)
+	return
+}
+func StdTime(t time.Time) (time string) {
+	time = t.Format(`15:04:05`)
+	return
 }
 
 // 复制文件
@@ -80,102 +53,64 @@ func PathExist(path string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-const (
-	TYPE_NOT_SUPPORT uint8 = iota
-	TYPE_STRING
-	TYPE_INT
-	TYPE_UINT
-	TYPE_FLOAT
-	TYPE_BOOL
-	TYPE_NULL
-)
-
-//not support int8/uint8 please use int16/uint16
-func InterfaceToString(ifc interface{}) (value string, stype uint8) {
-	if ifc == nil {
-		return ``, TYPE_NULL
-	}
-	switch val := ifc.(type) {
-	case int16:
-		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
-	case int32:
-		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
-	case int64:
-		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
-	case int:
-		value, stype = strconv.FormatInt(int64(val), 10), TYPE_INT
-	case uint16:
-		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
-	case uint32:
-		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
-	case uint64:
-		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
-	case uint:
-		value, stype = strconv.FormatUint(uint64(val), 10), TYPE_UINT
-	case float32:
-		value, stype = strconv.FormatFloat(float64(val), 'g', -1, 32), TYPE_FLOAT
-	case float64:
-		value, stype = strconv.FormatFloat(val, 'g', -1, 64), TYPE_FLOAT
-	case bool:
-		ret := `0`
-		if val {
-			ret = `1`
+// convert camel string to underlined, XxYy to xx_yy
+func ToUnderline(cameled string) string {
+	buf := make([]byte, 0, len(cameled)+5)
+	for i := 0; i < len(cameled); i++ {
+		c := cameled[i]
+		if c >= 'A' && c <= 'Z' {
+			c += 32
+			if i > 0 {
+				buf = append(buf, '_')
+			}
 		}
-		value, stype = ret, TYPE_BOOL
-	case string:
-		value, stype = val, TYPE_STRING
-	case []byte:
-		value, stype = string(val), TYPE_STRING
-	case time.Time:
-		value, stype = ``, TYPE_STRING
-	default:
-		value, stype = ``, TYPE_NOT_SUPPORT
+		buf = append(buf, c)
 	}
-	return
+	return string(buf)
 }
 
-//not support int8/uint8 please use int16/uint16
-func InterfaceToInt(ifc interface{}) (value int, stype uint8) {
-	if ifc == nil {
-		return 0, TYPE_NULL
+func IsUpperCase(c byte) bool {
+	if c >= 'A' && c <= 'Z' {
+		return true
 	}
-	switch val := ifc.(type) {
-	case int16:
-		value, stype = int(val), TYPE_INT
-	case int32:
-		value, stype = int(val), TYPE_INT
-	case int64:
-		value, stype = int(val), TYPE_INT
-	case int:
-		value, stype = val, TYPE_INT
-	case uint16:
-		value, stype = int(val), TYPE_UINT
-	case uint32:
-		value, stype = int(val), TYPE_UINT
-	case uint64:
-		value, stype = int(val), TYPE_UINT
-	case uint:
-		value, stype = int(val), TYPE_UINT
-	case float32:
-		value, stype = int(val), TYPE_FLOAT
-	case float64:
-		value, stype = int(val), TYPE_FLOAT
-	case bool:
-		ret := 0
-		if val {
-			ret = 1
+	return false
+}
+
+// convert underlined string to camel, aa_bb to AaBb
+func ToCamel(underlined string) string {
+	buf := make([]byte, 0, len(underlined))
+	upper := true
+	for i := 0; i < len(underlined); i++ {
+		c := underlined[i]
+		if c == '_' {
+			upper = true
+			continue
 		}
-		value, stype = ret, TYPE_BOOL
-	case string:
-		ret, _ := strconv.Atoi(val)
-		value, stype = ret, TYPE_STRING
-	case []byte:
-		ret, _ := strconv.Atoi(string(val))
-		value, stype = ret, TYPE_STRING
-	case time.Time:
-		value, stype = 0, TYPE_STRING
-	default:
-		value, stype = 0, TYPE_NOT_SUPPORT
+		if upper {
+			upper = false
+			if c >= 'a' && c <= 'z' {
+				c -= 32
+			}
+		}
+		buf = append(buf, c)
+	}
+	return string(buf)
+}
+
+var (
+	_rand = rand.New(rand.NewSource(time.Now().Unix()))
+	_dict = []byte(`_0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ`)
+)
+
+func Rand(max int) int {
+	return _rand.Intn(max)
+}
+
+func RandBytes(ln int) (bs []byte) {
+	bs = make([]byte, ln)
+	for i := 0; i < ln; i++ {
+		r := Rand(len(_dict))
+		bs[i] = _dict[r]
 	}
 	return
 }
