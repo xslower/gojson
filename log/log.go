@@ -5,10 +5,11 @@ import (
 	"path/filepath"
 	"strings"
 	"io"
-	"github.com/resure-tech/lib/goutils/nolock"
+	"github.com/resure-tech/lib/base/nolock"
 	"time"
 	"github.com/resure-tech/lib/goutils/utils"
 	"log"
+	"github.com/resure-tech/lib/base/types"
 )
 
 const (
@@ -118,7 +119,7 @@ func (this *Logger) PrintBytes(bmsg []byte) {
 }
 
 func (this *Logger) PrefixPrintln(prefix string, msg ...string) {
-	buf := utils.NewBytes(len(msg) * 30)
+	buf := types.NewBufBytes(len(msg) * 30)
 	now := utils.StdDateTime(time.Now())
 	buf.WriteString(now)
 	buf.WriteByte(' ')
